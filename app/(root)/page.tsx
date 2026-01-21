@@ -40,6 +40,33 @@ const dashboardData = [
     techIcons: [Database, Cloud],
     color: "group-hover:border-blue-500/50",
   },
+  {
+    title: "Mobile Dev",
+    description: "iOS & Android development with React Native and Swift.",
+    logoText: "MD",
+    logoColor: "bg-green-600",
+    badge: "Technical",
+    techIcons: [Smartphone, Code],
+    color: "group-hover:border-green-500/50",
+  },
+  {
+    title: "Cybersecurity",
+    description: "Network security, encryption, and threat analysis.",
+    logoText: "CS",
+    logoColor: "bg-red-600",
+    badge: "Technical",
+    techIcons: [Shield, Lock],
+    color: "group-hover:border-red-500/50",
+  },
+  {
+    title: "Data Science",
+    description: "Machine learning, python data analysis and statistics.",
+    logoText: "DS",
+    logoColor: "bg-yellow-600",
+    badge: "Technical",
+    techIcons: [Terminal, Database],
+    color: "group-hover:border-yellow-500/50",
+  },
 ];
 
 const Home = () => {
