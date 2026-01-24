@@ -15,7 +15,7 @@
 
 ![App Demo](public/demo.gif)
 
-*(Please record your usage session and save it as `public/demo.gif` to see it here!)*
+
 
 ---
 
