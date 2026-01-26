@@ -50,7 +50,7 @@ const InterviewModal = ({
     type FormData = z.infer<typeof formSchema>;
 
     const form = useForm<FormData>({
-        resolver: zodResolver(formSchema),
+        resolver: zodResolver(formSchema) as any,
         defaultValues: {
             jobRole: initialJobRole,
             techStack: "",

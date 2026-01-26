@@ -1,6 +1,7 @@
-import { initializeApp, getApps, getApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
+import { initializeApp, getApps, getApp, type FirebaseApp } from "firebase/app";
+import { getAuth, type Auth } from "firebase/auth";
+import { getFirestore, type Firestore } from "firebase/firestore";
+
 const firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
     authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
@@ -9,9 +10,11 @@ const firebaseConfig = {
     messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
     appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
-let app;
-let auth;
-let db;
+
+let app: FirebaseApp | undefined;
+let auth: Auth;
+let db: Firestore | undefined;
+
 try {
     if (firebaseConfig.apiKey && firebaseConfig.projectId) {
         app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
@@ -23,7 +26,7 @@ try {
             currentUser: null,
             signOut: async () => { },
             onAuthStateChanged: () => () => { }
-        } as any;
+        } as unknown as Auth;
     }
 } catch (error) {
     console.error("Firebase initialization failed:", error);
@@ -31,6 +34,7 @@ try {
         currentUser: null,
         signOut: async () => { },
         onAuthStateChanged: () => () => { }
-    } as any;
+    } as unknown as Auth;
 }
+
 export { app, auth, db };
