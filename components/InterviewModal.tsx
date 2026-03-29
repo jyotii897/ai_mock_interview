@@ -82,18 +82,23 @@ const InterviewModal = ({
                 body: JSON.stringify(values),
             });
 
+            console.log("Raw Response Status:", response.status);
             const data = await response.json();
-            console.log("Gemini Response:", data);
+            console.log("Gemini Parsed Response Data:", data);
 
-            if (data.questions) {
+            if (response.ok && data.questions) {
                 // Save to localStorage for the interview page
                 localStorage.setItem("interviewQuestions", JSON.stringify(data.questions));
                 // Close modal and navigate
                 onOpenChange(false);
                 router.push("/interview");
             } else {
-                console.error("No questions returned", data);
-                alert(`Error: ${data.error || "No questions returned from AI"}`);
+                console.error("Interview generation failed:", {
+                    status: response.status,
+                    data
+                });
+                const errorMessage = data.error || (data.questions ? "Unexpected format" : "No questions returned from AI");
+                alert(`Error (${response.status}): ${errorMessage}`);
             }
 
         } catch (error) {

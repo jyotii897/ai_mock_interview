@@ -28,7 +28,7 @@ async function testModel(modelName) {
 
 async function run() {
     // Try newer models first
-    const models = ["gemini-1.5-flash", "gemini-2.0-flash-exp", "gemini-1.5-pro", "gemini-1.0-pro", "gemini-pro"];
+    const models = ["gemini-1.5-flash", "gemini-2.0-flash", "gemini-1.5-pro", "gemini-1.0-pro", "gemini-pro"];
 
     for (const m of models) {
         const success = await testModel(m);

@@ -4,55 +4,46 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 export async function POST(req: Request) {
     try {
         const { jobRole, techStack, yearsOfExperience, questionCount } = await req.json();
-
-        const apiKey = process.env.GEMINI_API_KEY;
-        console.log("API Key configured:", !!apiKey);
+        const apiKey = process.env.GEMINI_API_KEY?.trim();
 
         if (!apiKey) {
-            return NextResponse.json(
-                { error: "GEMINI_API_KEY is not configured" },
-                { status: 500 }
-            );
+            return NextResponse.json({ error: "GEMINI_API_KEY is not configured" }, { status: 500 });
         }
 
         const genAI = new GoogleGenerativeAI(apiKey);
-        const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-exp" });
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
         const prompt = `
-      You are an expert technical interviewer.
-      Generate ${questionCount} technical interview questions for a ${jobRole} position.
-      Tech Stack: ${techStack || "General"}.
-      Experience Level: ${yearsOfExperience} years.
+            You are an expert technical interviewer.
+            Generate ${questionCount} technical interview questions for a ${jobRole} position.
+            Tech Stack: ${techStack || "General"}.
+            Experience Level: ${yearsOfExperience} years.
 
-      Return the response STRICTLY as a JSON array of objects, where each object has:
-      - "question": The interview question.
-      - "answer": A brief suggested answer or key points to look for.
+            Return ONLY a valid JSON array of objects. NO markdown blocks, NO "json" label.
+            Each object MUST have:
+            - "question": string
+            - "answer": string
+        `;
 
-      Do not include any markdown formatting (like \`\`\`json). Just the raw JSON array.
-    `;
-
-        console.log("Sending prompt to Gemini...");
         const result = await model.generateContent(prompt);
         const response = await result.response;
         const text = response.text();
-        console.log("Gemini Raw Response:", text);
-
-        // Clean up if Gemini wraps in markdown code blocks
-        const cleanedText = text.replace(/```json/g, "").replace(/```/g, "").trim();
+        
+        // Clean markdown if Gemini still provides it
+        let cleanedText = text.replace(/```json/g, "").replace(/```/g, "").trim();
 
         try {
             const jsonResponse = JSON.parse(cleanedText);
             return NextResponse.json({ questions: jsonResponse });
         } catch (e) {
-            console.error("Failed to parse Gemini response:", text);
-            return NextResponse.json({ error: "Failed to generate valid JSON format", raw: text }, { status: 500 });
+            console.error("Gemini failed to generate valid JSON:", text);
+            return NextResponse.json({ error: "AI response failed to parse as JSON. Please try again.", raw: text }, { status: 500 });
         }
 
     } catch (error) {
-        console.error("Error generating questions:", error);
-        return NextResponse.json(
-            { error: `Internal Server Error: ${error instanceof Error ? error.message : String(error)}` },
-            { status: 500 }
-        );
+        console.error("Gemini API Error:", error);
+        return NextResponse.json({ 
+            error: `API Connection Error: ${error instanceof Error ? error.message : "Possible network or config issue"}` 
+        }, { status: 500 });
     }
 }
