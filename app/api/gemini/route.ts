@@ -1,49 +1,37 @@
 import { NextResponse } from "next/server";
-import { GoogleGenerativeAI } from "@google/generative-ai";
 
-export async function POST(req: Request) {
-    try {
-        const { jobRole, techStack, yearsOfExperience, questionCount } = await req.json();
-        const apiKey = process.env.GEMINI_API_KEY?.trim();
+export async function POST() {
+    console.log("!!! 🏁 EMERGENCY MOCK ROUTE HIT 🏁 !!!");
+    
+    // HARDCODED QUESTIONS for your 10:00 interview
+    const data = {
+        questions: [
+            { 
+                question: "Explain the difference between useMemo and useCallback in React.", 
+                answer: "useMemo returns a memoized value, while useCallback returns a memoized function." 
+            },
+            { 
+                question: "What are the common ways to improve Next.js performance?", 
+                answer: "Using Image components, lazy loading, and choosing the right rendering strategy (ISR/SSR)." 
+            },
+            { 
+                question: "What is a Closure in JavaScript?", 
+                answer: "A closure is when a function remembers its lexical scope even when it is executed outside that scope." 
+            },
+            { 
+                question: "Wait, is this working?", 
+                answer: "Yes, this is a hardcoded response to ensure your interview works right now!" 
+            }
+        ]
+    };
 
-        if (!apiKey) {
-            return NextResponse.json({ error: "GEMINI_API_KEY is not configured" }, { status: 500 });
+    return new Response(JSON.stringify(data), {
+        status: 200,
+        headers: { 
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+            "Access-Control-Allow-Headers": "Content-Type, Authorization"
         }
-
-        const genAI = new GoogleGenerativeAI(apiKey);
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-
-        const prompt = `
-            You are an expert technical interviewer.
-            Generate ${questionCount} technical interview questions for a ${jobRole} position.
-            Tech Stack: ${techStack || "General"}.
-            Experience Level: ${yearsOfExperience} years.
-
-            Return ONLY a valid JSON array of objects. NO markdown blocks, NO "json" label.
-            Each object MUST have:
-            - "question": string
-            - "answer": string
-        `;
-
-        const result = await model.generateContent(prompt);
-        const response = await result.response;
-        const text = response.text();
-        
-        // Clean markdown if Gemini still provides it
-        let cleanedText = text.replace(/```json/g, "").replace(/```/g, "").trim();
-
-        try {
-            const jsonResponse = JSON.parse(cleanedText);
-            return NextResponse.json({ questions: jsonResponse });
-        } catch (e) {
-            console.error("Gemini failed to generate valid JSON:", text);
-            return NextResponse.json({ error: "AI response failed to parse as JSON. Please try again.", raw: text }, { status: 500 });
-        }
-
-    } catch (error) {
-        console.error("Gemini API Error:", error);
-        return NextResponse.json({ 
-            error: `API Connection Error: ${error instanceof Error ? error.message : "Possible network or config issue"}` 
-        }, { status: 500 });
-    }
+    });
 }
